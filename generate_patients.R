@@ -77,7 +77,8 @@ gen_pats <- function(n, sex_wgt = c(0.505, 0.495),
     bind_cols(samples %>% filter(sex == "F"), sampled_female_names, sampled_female_ages),
     bind_cols(samples %>% filter(sex == "M"), sampled_male_names, sampled_male_ages)
   ) %>%
-    select(id, name, surname, sex, birth_date)
+    select(id, name, surname, sex, birth_date) %>%
+    sample_n(nrow(.))
 }
 
 gen_ages <- function(n, age_wgts) {

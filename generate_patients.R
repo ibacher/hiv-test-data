@@ -28,7 +28,7 @@ surnames <- as_tibble(randomNamesData$last_names_e5, rownames = "name") %>%
 #' 
 #' age_wgt structures run from children (< 15 years) and from there in 10 year
 #' distributions (15-24, 25-34, 35-44, 45-54, 55-64, 65-74, 75-84, 85-94, 95+)
-#' the default distributions are calculat./;ed from the 2019 data from https://www.populationpyramid.net/
+#' the default distributions are calculated from the 2019 data from https://www.populationpyramid.net/
 #' which are in turn based on these sources https://www.populationpyramid.net/sources
 #' 
 #' base_date: determines the date used as a baseline to determine actual birthdates
@@ -63,7 +63,7 @@ gen_pats <- function(n, sex_wgt = c(0.505, 0.495),
   sampled_female_ages <- gen_ages(n_sampled_females, age_wgt_f) %>%
     gen_birthdates(base_date)
   
-  sampled_surnames <- last_names %>%
+  sampled_surnames <- surnames %>%
     sample_n(n, replace = TRUE, weight = prop) %>%
     select(name)
   
@@ -91,7 +91,7 @@ gen_birthdates <- function(ages, base_date = today()) {
   ages %>%
     mutate(base_date = base_date - years(age)) %>%
     rowwise() %>%
-    mutate(date_shift = sample.int(as.integer(base_date) - as.integer(base_date - years(1)), size=1)) %>%
+    mutate(date_shift = sample.int(as.integer(base_date) - as.integer(base_date - years(1)), size = 1)) %>%
     ungroup() %>%
     mutate(birth_date = base_date - date_shift) %>%
     select(-c(base_date, date_shift))

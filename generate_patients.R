@@ -123,7 +123,7 @@ gen_pat_ids <- function(n, base_charset = "0123456789ACDEFGHJKLMNPRTUVWXY",
 # converts a number to a string representation for a given alphabet
 convert_from_base <- function(s, base_charset) {
   n <- length(base_charset)
-  v_s <- str_split(s, "")[[1]]
+  v_s <- explode_chr(s)
   
   sum(imap_dbl(v_s, ~ ((which(base_charset == .x)) * n ^ (.y - 1)) - 1))
 }
@@ -144,7 +144,7 @@ convert_to_base <- function(i, base_charset) {
 # computes the Luhn ModN check digit for a given string representation and alphabet
 compute_check_digit <- function(id, base_charset) {
   n <- length(base_charset)
-  v_id <- str_split(id, "")[[1]]
+  v_id <- explode_chr(id)
   v_id_cp <- map_int(v_id, ~ which(base_charset == .))
   
   base_charset[sum(imap_dbl(rev(v_id_cp), ~ .x * ifelse(.y %% 2 == 0, 2, 1))) %% n]

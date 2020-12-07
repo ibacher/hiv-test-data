@@ -1,6 +1,5 @@
 library(tidyverse)
 library(lubridate)
-# business days
 library(bizdays)
 library(here)
 
@@ -91,6 +90,11 @@ simulation_parameters$death_prob_natural <- c(0, .00075, .00128, .0019, .00401, 
 simulation_parameters$current_month <- NULL
 simulation_parameters$patient_pool <- NULL
 
+simulation_parameters$m_visits_per_day <- 53
+simulation_parameters$sd_visits_per_day <- 15
+simulation_parameters$m_new_patients_per_day <- 3
+simulation_parameters$sd_new_patients_per_day <- 1.2
+
 #' This is the main simulator function that takes the parameters and runs the
 #' simulation. The simulation period is generally monthly, but certain factors
 #' may cause patients to have visits more frequently.
@@ -117,8 +121,6 @@ run_sim <- function(sim_params) {
     sim_params$current_month <-
       floor_date(sim_params$current_month, unit = "month") + months(1)
   }
-  
-  View(sim_params$patient_pool)
 }
 
 #' adds up to `n` new patients to the simulation
@@ -128,21 +130,24 @@ run_sim <- function(sim_params) {
 add_new_patients <- function(sim_params, n = NA) {
   # some logic for determining the default value of n
   if (is.na(n)) {
-    # if we don't have a pool, n is the default pool size
     if (is.null(sim_params$patient_pool)) {
+      # if we don't have a pool, n is the default pool size
       n <- sim_params$starting_pool_size
+    } else {
       # otherwise, add the number of patients specified by the growth rate
       # note that the actually added number of patients will likely be less than
       # this as we don't include any duplicate identifiers
-    } else {
       n <- round(sim_params$starting_pool_size * sim_params$pool_growth_rate)
     }
     
-    patients <- gen_pats(n,
-                         sex_wgt = c(sim_params$pct_m, sim_params$pct_f),
-                         age_wgt_m = sim_params$age_wgt_m,
-                         age_wgt_f = sim_params$age_wgt_f,
-                         base_date = sim_params$start_date) %>%
+    patients <- suppressWarnings(
+      gen_pats(n,
+               sex_wgt = c(sim_params$pct_m, sim_params$pct_f),
+               age_wgt_m = sim_params$age_wgt_m,
+               age_wgt_f = sim_params$age_wgt_f,
+               base_date = if_else(is.null(sim_params$current_month),
+                                   sim_params$start_date,
+                                   sim_params$current_month)) %>%
       # add simulation tracking elements
       mutate(
         alive = TRUE,
@@ -152,7 +157,7 @@ add_new_patients <- function(sim_params, n = NA) {
         due = FALSE,
         last_visit_dt = as.Date(NA),
         last_vl = MissingVL(),
-        last_vl_dt = as.Date(NA))
+        last_vl_dt = as.Date(NA)))
     
     if (is.null(sim_params$patient_pool)) {
       sim_params$patient_pool <- patients
@@ -256,7 +261,7 @@ calculate_deaths <- function(sim_params, start_of_month, end_of_month) {
     rowwise() %>%
     # update dead patients to be not alive, but dead patients should remain dead
     # NO ZOMBIES!
-    mutate(alive = ifelse(!alive, FALSE, sample(c(TRUE, FALSE), 1, prob = c(
+    mutate(alive = if_else(!alive, FALSE, sample(c(TRUE, FALSE), 1, prob = c(
       1 - sim_params$death_prob_natural_by_month[age_bin],
       sim_params$death_prob_natural_by_month[age_bin])))) %>%
     select(-(age_bin)) %>%
@@ -294,5 +299,3 @@ update_due <- function(sim_params, start_of_month, end_of_month) {
               (is.suppressed(last_vl) &
                  is.na(last_visit_dt) | last_visit_dt < (start_of_month - months(3)))))))
 }
-
-run_sim(simulation_parameters)

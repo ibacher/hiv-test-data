@@ -11,25 +11,18 @@ data("randomNamesData")
 surnames <- as_tibble(randomNamesData$last_names_e5, rownames = "name") %>%
   rename(prop = value)
 
-
 #' Generate random patients using some parameters
 #' 
 #' Note that names are derived from US SSA and Census data, which severly limits
 #' the diversity of possible names
 #' 
 #' sex_wgt: defines the relative weight between male and females in the population
-#' the default value reflects the WHO base line of 105 male births per 100 female
-#' births (http://origin.searo.who.int/entity/health_situation_trends/data/chi/sex-ratio/en/)
-#' 
 #' 
 #' age_wgt_m: defines the relative weight of ages for males
 #' 
 #' age_wgt_f: defines the relative weight of ages for females
 #' 
 #' age_wgt structures run from children (< 15 years) and from there in 10 year
-#' distributions (15-24, 25-34, 35-44, 45-54, 55-64, 65-74, 75-84, 85-94, 95+)
-#' the default distributions are calculated from the 2019 data from https://www.populationpyramid.net/
-#' which are in turn based on these sources https://www.populationpyramid.net/sources
 #' 
 #' base_date: determines the date used as a baseline to determine actual birthdates
 #' 
@@ -78,7 +71,8 @@ gen_pats <- function(n, sex_wgt = c(0.505, 0.495),
     bind_cols(samples %>% filter(sex == "M"), sampled_male_names, sampled_male_ages)
   ) %>%
     select(id, name, surname, sex, birth_date) %>%
-    sample_n(nrow(.))
+    # randomise patients
+    slice_sample(prop = 1)
 }
 
 gen_ages <- function(n, age_wgts) {
@@ -147,7 +141,9 @@ compute_check_digit <- function(id, base_charset) {
   v_id <- explode_chr(id)
   v_id_cp <- map_int(v_id, ~ which(base_charset == .))
   
-  base_charset[sum(imap_dbl(rev(v_id_cp), ~ .x * ifelse(.y %% 2 == 0, 2, 1))) %% n]
+  checksum <- sum(imap_dbl(rev(v_id_cp), ~ .x * ifelse(.y %% 2 == 0, 2, 1)))
+  
+  base_charset[(n - (checksum %% n)) %% n + 1]
 }
 
 explode_chr <- function(s) {

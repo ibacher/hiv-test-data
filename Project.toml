@@ -1,0 +1,20 @@
+name = "HIVTestData"
+uuid = "e0a2dabd-09dd-45f8-bd6d-e8d9e4a147cb"
+authors = ["Ian Bacher <ian_bacher@brown.edu>"]
+version = "0.1.0"
+
+[deps]
+BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
+BusinessDays = "4f18b42c-503e-5345-9536-bb0f25fc7038"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+DataFramesMeta = "1313f7d8-7da2-5740-9ea0-a2ca25f37964"
+Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
+FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
+JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
+SnoopCompile = "aa65fe97-06da-5843-b5b1-d5d13cad87d2"
+StatProfilerHTML = "a8a75453-ed82-57c9-9e16-4cd1196ecbf5"
+StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
+TimeZones = "f269a46b-ccf7-5d73-abea-4c690281aa53"

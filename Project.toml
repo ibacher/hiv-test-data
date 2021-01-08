@@ -6,6 +6,7 @@ version = "0.1.0"
 [deps]
 BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
 BusinessDays = "4f18b42c-503e-5345-9536-bb0f25fc7038"
+CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 DataFramesMeta = "1313f7d8-7da2-5740-9ea0-a2ca25f37964"
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
@@ -17,4 +18,8 @@ Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 SnoopCompile = "aa65fe97-06da-5843-b5b1-d5d13cad87d2"
 StatProfilerHTML = "a8a75453-ed82-57c9-9e16-4cd1196ecbf5"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
+StatsPlots = "f3b207a7-027a-5e70-b257-86293d7955fd"
 TimeZones = "f269a46b-ccf7-5d73-abea-4c690281aa53"
+
+[compat]
+julia = "1.4"

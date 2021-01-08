@@ -2,12 +2,15 @@ using HIVTestData
 using BusinessDays
 using Random
 using Dates
+using DataFrames
+using TimeZones
 
 simulation_parameters = SimulationParameters(
   "simulation_output",    # output directory
-  Random.make_seed(),     # seed
+  BusinessDays.WeekendsOnly(), # holiday calendar
+  MersenneTwister(Random.make_seed()), # rng
   Date(2015, 1, 1),       # start date
-  Date(2015, 12, 1),      # end date
+  Date(2021, 1, 1),       # end date
   Time("9:00"),           # day start
   Time("5:00"),           # day end
   tz"UTC",                # timezone
@@ -28,12 +31,8 @@ simulation_parameters = SimulationParameters(
   [.00075, .00128, .0019, .00401, .00879, .01786,
    .04473, .13392, .13392],
   .1,                     # % data missing
-  .85                     # % vls that are numeric (remainder
-                          # are categorical)
+  .13,                    # % missed appointments
+  .22                     # % ART failures
 )
 
-simulation_state = SimulationState(
-  BusinessDays.WeekendsOnly(),
-  MersenneTwister(simulation_parameters.seed))
-
-run_simulation(simulation_state, simulation_parameters)
+run_simulation(simulation_parameters)

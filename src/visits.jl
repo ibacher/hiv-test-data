@@ -1,6 +1,6 @@
 function generate_visits(state::SimulationState,
-    params::SimulationParameters, patients)
-  n_pats = nrow(patients)
+    params::SimulationParameters, patient_idxs)
+  n_pats = length(patient_idxs)
 
   # these are are results
   visits = DataFrame([String, Date, Union{VL, Missing}], [:id, :date, :vl], n_pats)
@@ -10,24 +10,31 @@ function generate_visits(state::SimulationState,
     last_visit_dt[i] = state.current_date
   end
 
-  patients.last_visit_dt = last_visit_dt
-  patients.due = zeros(Bool, n_pats)
+  state.patient_pool[patient_idxs, :last_visit_dt] = last_visit_dt
+  state.patient_pool[patient_idxs, :due] = zeros(Bool, n_pats)
 
-  for (i, r) in enumerate(eachrow(patients))
-    if rand(state.rng) <= params.p_data_missing
+  j = 0
+  @inbounds for i in patient_idxs
+    j += 1
+
+    if rand(params.rng) <= params.p_data_missing ||
+        rand(params.rng) <= params.p_missed_appts
+      visits[j, :id] = ""
       continue
     end
 
-    if ismissing(r.first_visit_dt)
-      r.first_visit_dt = state.current_date
+    if ismissing(state.patient_pool[i, :first_visit_dt])
+      state.patient_pool[i, :first_visit_dt] = state.current_date
     end
 
-    if ismissing(r.last_vl)
+    viral_load = generate_vl(state, params, state.patient_pool[i, :last_vl])
 
-    end
+    visits[j, :id] = state.patient_pool[i, :id]
+    visits[j, :date] = state.current_date
+    visits[j, :vl] = viral_load
 
-    visits[i, :id] = row.id
-    visits[i, :date] = state.current_date
-    visits[i, :vl] = missing
+    state.patient_pool[j, :last_vl] = viral_load
   end
+
+  filter!(r -> r.id != "", visits)
 end

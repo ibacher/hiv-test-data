@@ -298,16 +298,22 @@ function update_ltfu(state::SimulationState, params::SimulationParameters)
   # we cannot lose more patients than are due
   n_lost = min(n_ltfu, n_due)
 
+  if n_lost < 1
+    return nothing
+  end
+
   ltfu_patients = view(due_patients, sample(params.rng, 1:nrow(due_patients), n_lost, replace=false), :)
   ltfu_patients[:, :ltfu] = ones(Bool, n_lost)
   ltfu_patients[:, :due] = zeros(Bool, n_lost)
+
+  nothing
 end
 
-function write_monthly_visits(state:SimulationState, params::SimulationParameters, date::Date)
+function write_monthly_visits(state::SimulationState, params::SimulationParameters, date::Date)
   CSV.write(joinpath(params.output_directory,
-  "$(Dates.year(old_date))-$(Dates.month(old_date))_visits.csv"),
-  state.visits)
+    "$(Dates.format(date, dateformat"yyyy-mm"))_visits.csv"),
+    state.visits)
 
-  println("Finished $(Dates.format(old_date, dateformat"u yyyy"))")
+  println("Finished $(Dates.format(date, dateformat"u yyyy"))")
   state.visits = DataFrame()
 end

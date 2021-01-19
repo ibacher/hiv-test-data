@@ -33,7 +33,7 @@ function generate_visits(state::SimulationState,
     visits[j, :date] = state.current_date
     visits[j, :vl] = viral_load
 
-    state.patient_pool[j, :last_vl] = viral_load
+    state.patient_pool[i, :last_vl] = viral_load
   end
 
   filter!(r -> r.id != "", visits)

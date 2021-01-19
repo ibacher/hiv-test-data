@@ -1,0 +1,130 @@
+---
+title: " Distillation"
+author: "Allan Kimaina"
+
+
+---
+
+# Introduction
+
+
+
+```{r setup, include=FALSE}
+options(java.parameters = "-Xmx15g")
+
+knitr::opts_chunk$set(warning=FALSE,
+                      message=FALSE,
+                      echo=T,
+                      #dpi=96,
+                     # fig.width=7,# fig.height=4, # Default figure widths
+                     # dev="png", #dev.args=list(type="cairo"), # The png device
+                      # Change to dev="postscript" if you want the EPS-files
+                      # for submitting. Also remove the dev.args() as the postscript
+                      # doesn't accept the type="cairo" argument.
+                      error=FALSE)
+ 
+
+# Use the table counter that the htmlTable() provides
+options(table_counter = TRUE)
+ 
+
+#devtools::install_github("kassambara/easyGgplot2")
+library(easyGgplot2)
+
+# function to install missing packages
+ipak <- function(pkg){
+  new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
+  if (length(new.pkg))
+    install.packages(new.pkg, dependencies = TRUE, repos='http://cran.rstudio.com/')
+  sapply(pkg, require, character.only = TRUE)
+}
+
+#install.packages('package_name', dependencies=TRUE, repos='http://cran.rstudio.com/')
+
+packages =c( "dplyr", "tidyverse", "caret", "knitr", "kableExtra","xtable", "stargazer", "ggpubr", "haven", "tidycomm", "gtable", "ggpmisc", "foreign")
+
+ipak(packages)
+
+# overide
+select = dplyr::select; summarize = dplyr::summarize; rename = dplyr::rename; mutate = dplyr::mutate;
+
+
+```
+
+
+
+## Import dataset
+```{r warning=F}
+# import countries
+dataset <- readr::read_csv("https://raw.githubusercontent.com/kimaina/vl-indicators/main/2020_monthly_aggregates_v2.csv")
+dataset%>%head()%>%
+  kable( "html", booktabs = T, longtable = F,  digits=2,
+         caption = "") %>%
+  kable_styling(bootstrap_options = c("striped","hold_position","condensed","responsive"))
+```
+
+
+[1] "month_year"                            "visit_this_month"                      "scheduled_this_month"                 
+ [4] "unscheduled_this_month"                "enrolled_this_month"                   "distinct_patients"                    
+ [7] "active_in_care_this_month"             "avg_days_since_rtc_date"               "LTFU_since_2015"                      
+[10] "LTFU_past_year"                        "LTFU_past_6months"                     "LTFU_this_month"                      
+[13] "deaths_this_month"                     "deaths_past_year"                      "transfer_out_this_month"              
+[16] "transfer_out_past_year"                "art_revisit_this_month"                "pre_art_this_month"                   
+[19] "on_art_this_month"                     "started_art_this_month"                "had_med_change_this_month"            
+[22] "ltfu"                                  "active"                                "dead"                                 
+[25] "ltfu_to_ltfu"                          "null_to_ltfu"                          "active_to_ltfu"                       
+[28] "dead_to_ltfu"                          "ltfu_to_active"                        "null_to_active"                       
+[31] "active_to_active"                      "dead_to_active"                        "ltfu_to_dead"                         
+[34] "null_to_dead"                          "active_to_dead"                        "dead_to_dead"                         
+[37] "on_original_first_line_this_month"     "on_alt_first_line_this_month"          "on_second_line_or_higher_this_month"  
+[40] "vl_suppressed_encounters_this_month"   "vl_unsuppressed_encounters_this_month" "vl_suppressed_patients_this_month"    
+[43] "vl_unsuppressed_patients_this_month"   "vl_suppressed_patients_past_year"      "vl_unsuppressed_patients_past_year"   
+[46] "vl_suppressed_encounters_past_year"    "vl_unsuppressed_encounters_past_year"  "due_for_vl_this_month"                
+[49] "qualifies_for_follow_up_vl"            "got_follow_up_vl_this_month"           "follow_up_vl_suppressed_this_month"   
+[52] "follow_up_vl_unsuppressed_this_month"  "follow_up_vl_unsuppressed"             "follow_up_vl_suppressed"              
+[55] "avg_num_days_to_follow_vl" 
+
+## Generate Proportions
+```{r warning=F}
+# import maternal 
+dataset.df <- dataset%>%mutate(
+  prop_scheduled_visits_this_month=scheduled_this_month/visit_this_month,
+  prop_enrollment_visits_this_month=enrolled_this_month/visit_this_month,
+  prop_ltfu=ltfu/(ltfu+active+dead),
+  prop_active=active/(ltfu+active+dead),
+  prop_dead=dead/(ltfu+active+dead),
+  prop_active_on_art_this_month= on_art_this_month/active,
+  # transitions
+  prop_ltfu_to_active=ltfu_to_active/active,
+  
+  prop_vl_suppressed_encounters_this_month =   vl_suppressed_encounters_this_month/(vl_suppressed_encounters_this_month+vl_unsuppressed_encounters_this_month),
+  prop_vl_suppressed_encounters_past_year=vl_suppressed_encounters_past_year/(vl_suppressed_encounters_past_year+vl_unsuppressed_encounters_past_year),
+  prop_vl_suppressed_patients_this_month=vl_suppressed_patients_this_month/(vl_unsuppressed_patients_this_month+vl_suppressed_patients_this_month),
+  prop_vl_suppressed_patients_past_year=vl_suppressed_patients_past_year/(vl_suppressed_patients_past_year+vl_unsuppressed_patients_past_year),
+  prop_due_for_vl_this_month=due_for_vl_this_month/(active+ltfu),
+  prop_qualifies_for_follow_up_vl=qualifies_for_follow_up_vl/(active+ltfu),
+  prop_got_follow_up_vl_this_month=got_follow_up_vl_this_month/(prop_qualifies_for_follow_up_vl+got_follow_up_vl_this_month),
+  prop_follow_up_vl_suppressed_this_month= follow_up_vl_suppressed_this_month/(follow_up_vl_suppressed_this_month+follow_up_vl_unsuppressed_this_month),
+  
+  
+)%>%select(
+ month_year,visit_this_month,prop_scheduled_visits_this_month,prop_enrollment_visits_this_month,prop_active_on_art_this_month,
+ prop_ltfu,prop_active,prop_dead, prop_ltfu_to_active,
+  prop_vl_suppressed_encounters_this_month,prop_vl_suppressed_encounters_past_year,prop_vl_suppressed_patients_this_month,prop_vl_suppressed_patients_past_year,
+  prop_due_for_vl_this_month,prop_qualifies_for_follow_up_vl,prop_got_follow_up_vl_this_month,
+  prop_follow_up_vl_suppressed_this_month, avg_num_days_to_follow_vl
+  
+  
+)
+
+dataset.df%>%kable( "html", booktabs = T, longtable = F,  digits=2,
+         caption = "Proportions") %>%
+  kable_styling(bootstrap_options = c("striped","hold_position","condensed","responsive"))
+```
+
+## Export
+```{r warning=F}
+
+write.csv(dataset.df, "proportions.csv")
+```
+

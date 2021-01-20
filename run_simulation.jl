@@ -24,12 +24,13 @@ simulation_parameters = SimulationParameters(
   240.5,                  # std # visits / day
   25.6,                   # avg # new patients / day
   6.7,                    # std # new patients / day
-  313.06,                 # avg # ltfu / week
-  90.34,                  # std # ltfu /week
+  419.79,                 # avg # ltfu / week
+  29.01,                  # std # ltfu /week
   Month(3),               # period btw visits (unsuppressed)
-  Month(12),              # period btw vl visits (suppressed)
+  Month(6),               # period btw vl visits (suppressed)
   [.00075, .00128, .0019, .00401, .00879, .01786,
    .04473, .13392, .13392],
+   .008,                  # additional death probability
   .1,                     # % data missing
   .13,                    # % missed appointments
   .22                     # % ART failures

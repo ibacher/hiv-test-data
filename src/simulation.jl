@@ -45,6 +45,7 @@ struct SimulationParameters
   period_between_visits_non_suppressed::Period
   period_between_visits_suppressed::Period
   death_prob_natural::Vector{Float64}
+  p_additional_death_prob::Float64
   p_data_missing::Float64
   p_missed_appts::Float64
   p_art_failure::Float64
@@ -232,7 +233,7 @@ function update_dead(state::SimulationState, params::SimulationParameters)
     age_bin = (round(Int, (state.current_date - row.birthdate).value / 365.25) -
       15) ÷ 10 + 1
     
-    death_prob = params.death_prob_natural[age_bin]
+    death_prob = params.death_prob_natural[age_bin] + params.p_additional_death_prob
     
     row.alive = sample(params.rng, [true, false],
       ProbabilityWeights([1 - death_prob, death_prob]))

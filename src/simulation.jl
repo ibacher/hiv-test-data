@@ -87,7 +87,7 @@ function run_simulation(params::SimulationParameters)
       params.calendar, state.current_date, -1))
   end
 
-  filter(r -> r.active, state.patient_pool, view=true) |>
+  filter(r -> r.active, state.patient_pool, view=true)[:, [:id, :name, :surname, :sex, :birthdate, :death_date]] |>
     CSV.write(joinpath(params.output_directory, "patient_pool.csv"))
 end
 

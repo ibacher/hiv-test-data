@@ -90,6 +90,8 @@ function run_simulation(params::SimulationParameters)
 
   filter(r -> r.active, state.patient_pool, view=true)[:, [:id, :name, :surname, :sex, :birthdate, :death_date]] |>
     CSV.write(joinpath(params.output_directory, "patient_pool.csv"))
+
+  nothing
 end
 
 @inline initialize_state(state::SimulationState, params::SimulationParameters) =

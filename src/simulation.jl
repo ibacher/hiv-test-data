@@ -233,6 +233,10 @@ function update_dead(state::SimulationState, params::SimulationParameters)
     age_bin = (round(Int, (state.current_date - row.birthdate).value / 365.25) -
       15) ÷ 10 + 1
     
+    if age_bin > length(params.death_prob_natural)
+      age_bin = length(params.death_prob_natural)
+    end
+    
     death_prob = params.death_prob_natural[age_bin] + params.p_additional_death_prob
     
     row.alive = sample(params.rng, [true, false],

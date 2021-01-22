@@ -105,7 +105,7 @@ function generate_numeric_vl(params::SimulationParameters,
 end
 
 function generate_non_suppressed_numeric_vl(params::SimulationParameters, last_vl::Missing)
-  NumericVL(rand(params.rng, 100_000:9_999_999))
+  NumericVL(rand(params.rng, 50_000:9_999_999))
 end
 
 function generate_non_suppressed_numeric_vl(params::SimulationParameters, last_vl::NumericVL)

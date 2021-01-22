@@ -47,8 +47,6 @@ struct SimulationParameters
   death_prob_natural::Vector{Float64}
   p_additional_death_prob::Float64
   p_data_missing::Float64
-  p_missed_appts::Float64
-  p_art_failure::Float64
 end
 
 """
@@ -105,14 +103,14 @@ function initialise_state(state::SimulationState, params::SimulationParameters)
     params.m_new_patients_per_day, params.sd_new_patients_per_day)
   state.ltfu_per_week = Distributions.Normal(params.m_ltfu_per_week,
     params.sd_ltfu_per_week)
-
-  state.patient_pool = add_new_patients(state, params)
-  state.visits = DataFrame()
   
   # we start on the business day either on or immediately after the
   # selected start date
   state.current_date = advancebdays(params.calendar, params.start_date - Day(1), 1)
 
+  state.patient_pool = add_new_patients(state, params)
+  state.visits = DataFrame()
+  
   output_directory = params.output_directory
   
   if !isdir(output_directory)
@@ -141,14 +139,14 @@ function add_new_patients(state::SimulationState, params::SimulationParameters; 
     Set()
   end
 
-  p = generate_patients(params.rng, n_pats)
+  p = generate_patients(params.rng, n_pats, base_date=state.current_date)
   # since it's possible to generate duplicate ids, we need to drop
   # duplicated patient ids
   filter!(r -> r.id ∉ ids, p)
 
   # ensure we always generate at least `n` valid patients
   while nrow(p) < n
-    p₁ = generate_patients(params.rng, n_pats)
+    p₁ = generate_patients(params.rng, n_pats, base_date=state.current_date)
     filter!(r -> r.id ∉ ids, p₁)
     append!(p, p₁)
   end

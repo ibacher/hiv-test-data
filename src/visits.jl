@@ -17,8 +17,7 @@ function generate_visits(state::SimulationState,
   @inbounds for i in patient_idxs
     j += 1
 
-    if rand(params.rng) <= params.p_data_missing ||
-        rand(params.rng) <= params.p_missed_appts
+    if rand(params.rng) <= params.p_data_missing
       visits[j, :id] = ""
       continue
     end

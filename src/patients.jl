@@ -172,7 +172,7 @@ function generate_birthdates(rng::AbstractRNG, ages;
   for (i, age) in enumerate(ages)
     starting_date = base_date - Dates.Year(age)
     date_shift = rand(rng,
-      0:Dates.value(starting_date - (starting_date - Dates.Year(1))))
+      0:Dates.value(starting_date - (starting_date - Dates.Year(1) + Dates.Day(1))))
     @inbounds birthdates[i] = starting_date - Dates.Day(date_shift)
   end
 

@@ -30,10 +30,8 @@ simulation_parameters = SimulationParameters(
   Month(6),               # period btw vl visits (suppressed)
   [.00075, .00128, .0019, .00401, .00879, .01786,
    .04473, .13392, .13392],
-   .008,                  # additional death probability
-  .1,                     # % data missing
-  .13,                    # % missed appointments
-  .22                     # % ART failures
+  .008,                  # additional death probability
+  .1                     # % data missing
 )
 
 run_simulation(simulation_parameters)

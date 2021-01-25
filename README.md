@@ -28,10 +28,10 @@ Visit files are written out every time the month changes, so the defined the num
 These files have the following schema:
 
 ```csv
-id,date,vl
+id,date,time,obs_code,vl
 ```
 
-Where `id` matches the id of a patient in the patient file, `date` is the date of the visit and `vl` is the VL recorded at that visit, albeit currently in a weird format (that will be fixed soon).
+Where `id` matches the id of a patient in the patient file, `date` is the date of the visit, `time` is the time of the visit, `obs_code` is the UUID of the CIEL concept that expresses the observation and `vl` is the value of the obs expressed in a format acceptable for a given `obs_code`.
 
 ## Running the Simulation
 

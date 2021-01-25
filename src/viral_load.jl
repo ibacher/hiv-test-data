@@ -34,28 +34,13 @@ struct CategoricalVL <: VL
   end
 end
 
-const MESSY_VALUES = (
-  "< 100", "< 200", "< 300", "< 500", "< 1000")
-
-"""
-This is used to represent suppressed viral loads, but without a clear
-numerical or coded value.
-"""
-struct MessyVL <: VL
-  val::String
-end
-
 issuppressed(::Missing) = false
 issuppressed(vl::NumericVL) = vl.val < 1000.0
 issuppressed(vl::CategoricalVL) = vl.val == 1306 || vl.val == 1302
-issuppressed(::MessyVL) = true
 
-Base.show(io::IO, ::MIME"text/plain", vl::NumericVL) =
-  print(io, "NumericVL $(vl.v)")
-  Base.show(io::IO, ::MIME"text/plain", vl::CategoricalVL) =
-  print(io, "CategoricalVL $(vl.v)")
-Base.show(io::IO, ::MIME"text/plain", vl::MessyVL) =
-  print(io, "MessyVL $(vl.val)")
+vl_to_tuple(vl::Missing) = (missing, missing)
+vl_to_tuple(vl::NumericVL) = ("856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", vl.val)
+vl_to_tuple(vl::CategoricalVL) = ("1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "$(vl.val)AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
 
 function generate_vl(state::SimulationState, params::SimulationParameters,
   last_vl::Union{VL, Missing})
@@ -77,12 +62,10 @@ function generate_vl(state::SimulationState, params::SimulationParameters,
   f = if suppressed
     p = rand(params.rng)
     
-    if p <= .85
+    if p <= .9
       generate_numeric_vl
-    elseif p <= .95
-      generate_categorical_vl
     else
-      generate_messy_vl
+      generate_categorical_vl
     end
   else
     if rand(params.rng) <= .85
@@ -138,9 +121,4 @@ function generate_categorical_vl(params::SimulationParameters,
       CategoricalVL(1304)
     end
   end
-end
-
-function generate_messy_vl(params::SimulationParameters,
-    suppressed::Bool, last_vl)
-  MessyVL(rand(params.rng, MESSY_VALUES))
 end

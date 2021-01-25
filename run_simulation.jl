@@ -12,8 +12,8 @@ simulation_parameters = SimulationParameters(
   Date(2015, 1, 1),       # start date
   Date(2021, 1, 1),       # end date
   Time("9:00"),           # day start
-  Time("5:00"),           # day end
-  tz"UTC",                # timezone
+  Time("17:00"),          # day end
+  Dates.Minute(15),       # length of appointment
   300_000,                # patient pool size (initial)
   .1,                     # pool growth rate
   .505,                   # % male

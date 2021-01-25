@@ -61,7 +61,7 @@ Parameter|Meaning
 `end_date`|The date that the simulation ends. No visits will occur after this date.
 `day_start`|Represents the start of the business day. Used to generate the time of the visit.
 `day_end`|Represents the end of the business day. Used to generate the time of the visit.
-`timezone`|The timezone to output datetimes in. This is largely ornamental.
+`visit_length`|This should be a Julia `Period` representing the usual visit time. It is just used to calculate the time at which a visit is recorded.
 `starting_pool_size`|The number of initial patients to generate. It is recommended to try and generate more patients than you will actually need upfront, as the initial generation of patients is somewhat faster than generating patients during the simulation. Nevertheless, new patients are generated as-required.
 `pool_growth_rate`|This determines the size by which the patient pool is grown every time new patients need to be added. It is expressed as a percentage of the starting pool size. For instance, `.1` means that 10% of the `starting_pool_size` patients will be generated every time new patients are required.
 `p_m`|This controls the (rough) percentage of patients who are assigned male sex. Note that `p_m` and `p_f` should add up to 1.

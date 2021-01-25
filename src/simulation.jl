@@ -10,6 +10,7 @@ mutable struct SimulationState
   visits_per_day::Normal{Float64}
   new_patients_per_day::Normal{Float64}
   ltfu_per_week::Normal{Float64}
+  visit_slots_per_day::Int
 
   SimulationState() = new()
 end
@@ -29,7 +30,7 @@ struct SimulationParameters
   end_date::Date
   day_start::Time
   day_end::Time
-  timezone::TimeZone
+  visit_length::Period
   starting_pool_size::Int
   pool_growth_rate::Float64
   p_m::Float64
@@ -110,6 +111,9 @@ function initialise_state(state::SimulationState, params::SimulationParameters)
 
   state.patient_pool = add_new_patients(state, params)
   state.visits = DataFrame()
+  state.visit_slots_per_day = round(Int,
+    convert(typeof(params.visit_length),
+      params.day_end - params.day_start).value / params.visit_length.value) - 1
   
   output_directory = params.output_directory
   
@@ -315,10 +319,12 @@ function update_ltfu(state::SimulationState, params::SimulationParameters)
 end
 
 function write_monthly_visits(state::SimulationState, params::SimulationParameters, date::Date)
+  visits = state.visits
+  state.visits = DataFrame()
+  
   CSV.write(joinpath(params.output_directory,
     "$(Dates.format(date, dateformat"yyyy-mm"))_visits.csv"),
-    state.visits)
+    visits)
 
   println("Finished $(Dates.format(date, dateformat"u yyyy"))")
-  state.visits = DataFrame()
 end

@@ -38,11 +38,11 @@ issuppressed(::Missing) = false
 issuppressed(vl::NumericVL) = vl.val < 1000.0
 issuppressed(vl::CategoricalVL) = vl.val == 1306 || vl.val == 1302
 
-vl_to_tuple(vl::Missing) = (missing, missing)
+vl_to_tuple(::Missing) = (missing, missing)
 vl_to_tuple(vl::NumericVL) = ("856AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", vl.val)
 vl_to_tuple(vl::CategoricalVL) = ("1305AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "$(vl.val)AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
 
-function generate_vl(state::SimulationState, params::SimulationParameters,
+function generate_vl(::SimulationState, params::SimulationParameters,
   last_vl::Union{VL, Missing})
   
   suppressed = if issuppressed(last_vl)
@@ -87,7 +87,7 @@ function generate_numeric_vl(params::SimulationParameters,
   end
 end
 
-function generate_non_suppressed_numeric_vl(params::SimulationParameters, last_vl::Missing)
+function generate_non_suppressed_numeric_vl(params::SimulationParameters, ::Missing)
   NumericVL(rand(params.rng, 50_000:9_999_999))
 end
 
@@ -98,12 +98,12 @@ function generate_non_suppressed_numeric_vl(params::SimulationParameters, last_v
   NumericVL(rand(params.rng, min_val:max_val))
 end
 
-function generate_non_suppressed_numeric_vl(params::SimulationParameters, last_vl)
+function generate_non_suppressed_numeric_vl(params::SimulationParameters, ::Union{VL, Missing})
   NumericVL(rand(params.rng, 1_000:200_000))
 end
 
 function generate_categorical_vl(params::SimulationParameters,
-    suppressed::Bool, last_vl)
+    suppressed::Bool, ::Union{VL, Missing})
   if suppressed
     if rand(params.rng) <= .75
       # Not detected
